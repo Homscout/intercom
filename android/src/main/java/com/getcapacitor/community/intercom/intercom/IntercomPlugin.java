@@ -11,6 +11,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 
 import org.json.JSONException;
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,10 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 import io.intercom.android.sdk.Intercom;
-import io.intercom.android.sdk.IntercomPushManager;
 import io.intercom.android.sdk.UserAttributes;
+import io.intercom.android.sdk.Company;
 import io.intercom.android.sdk.identity.Registration;
 import io.intercom.android.sdk.push.IntercomPushClient;
+import io.intercom.android.sdk.IntercomStatusCallback;
+import io.intercom.android.sdk.IntercomError;
 
 @CapacitorPlugin(name = "Intercom", permissions = @Permission(strings = {}, alias = "receive"))
 public class IntercomPlugin extends Plugin {
@@ -74,18 +77,36 @@ public class IntercomPlugin extends Plugin {
         if (userId != null && userId.length() > 0) {
             registration = registration.withUserId(userId);
         }
-        Intercom.client().registerIdentifiedUser(registration);
-        call.resolve();
+        Intercom.client().loginIdentifiedUser(registration, new IntercomStatusCallback() {
+            @Override
+            public void onSuccess() {
+                call.resolve();
+            }
+
+            @Override
+            public void onFailure(@NonNull IntercomError intercomError) {
+                call.reject(intercomError.getErrorMessage());
+            }
+        });
     }
 
     @PluginMethod
     public void registerUnidentifiedUser(PluginCall call) {
-        Intercom.client().registerUnidentifiedUser();
-        call.resolve();
+        Intercom.client().loginUnidentifiedUser(new IntercomStatusCallback() {
+            @Override
+            public void onSuccess() {
+                call.resolve();
+            }
+
+            @Override
+            public void onFailure(@NonNull IntercomError intercomError) {
+                call.reject(intercomError.getErrorMessage());
+            }
+        });
     }
 
     @PluginMethod
-    public void updateUser(PluginCall call) {
+    public void updateUser(PluginCall call) throws JSONException {
         UserAttributes.Builder builder = new UserAttributes.Builder();
         String userId = call.getString("userId");
         if (userId != null && userId.length() > 0) {
@@ -109,8 +130,45 @@ public class IntercomPlugin extends Plugin {
         }
         Map<String, Object> customAttributes = mapFromJSON(call.getObject("customAttributes"));
         builder.withCustomAttributes(customAttributes);
-        Intercom.client().updateUser(builder.build());
-        call.resolve();
+
+        JSObject company = call.getObject("company");
+        if (company != null) {
+            Company.Builder companyBuilder = new Company.Builder();
+            String companyId = company.getString("companyId");
+            if (companyId != null) {
+                companyBuilder.withCompanyId(companyId);
+            }
+            String companyName = company.getString("name");
+            if (companyName != null) {
+                companyBuilder.withName(companyName);
+            }
+
+            Map<String, Object> companyCustomAttributes = mapFromJSON(company.getJSObject("customAttributes"));
+            companyBuilder.withCustomAttributes(companyCustomAttributes);
+
+            try {
+                Long createdAt = company.getLong("createdAt");
+                if (createdAt != null) {
+                    companyBuilder.withCreatedAt(createdAt);
+                }
+            } catch (Exception e) {
+                Logger.error("Intercom", "ERROR: Could not handle company.createdAt", e);
+            }
+
+            builder.withCompany(companyBuilder.build());
+        }
+
+        Intercom.client().updateUser(builder.build(),  new IntercomStatusCallback() {
+            @Override
+            public void onSuccess() {
+                call.resolve();
+            }
+
+            @Override
+            public void onFailure(@NonNull IntercomError intercomError) {
+                call.reject(intercomError.getErrorMessage());
+            }
+        });
     }
 
     @PluginMethod
@@ -186,6 +244,13 @@ public class IntercomPlugin extends Plugin {
     public void displayCarousel(PluginCall call) {
         String carouselId = call.getString("carouselId");
         Intercom.client().displayCarousel(carouselId);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void startSurvey(PluginCall call) {
+        String surveyId = call.getString("surveyId");
+        Intercom.client().displaySurvey(surveyId);
         call.resolve();
     }
 

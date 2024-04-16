@@ -105,6 +105,7 @@ npx cap sync
 - displayInAppMessages
 - hideInAppMessages
 - displayCarousel
+- startSurvey
 - setUserHash
 - setBottomPadding
 

@@ -74,6 +74,12 @@ export class IntercomWeb extends WebPlugin implements IntercomPlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
+  async startSurvey(options: { surveyId: string }) {
+    options;
+    throw this.unimplemented('Not implemented on web.');
+  }
+
+
   async setUserHash(options: { hmac: string }) {
     options;
     throw this.unimplemented('Not implemented on web.');

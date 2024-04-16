@@ -21,6 +21,7 @@ export interface IntercomPlugin {
   displayInAppMessages(): Promise<void>;
   hideInAppMessages(): Promise<void>;
   displayCarousel(options: { carouselId: string }): Promise<void>;
+  startSurvey(options: { surveyId: string }): Promise<void>;
   setUserHash(options: { hmac: string }): Promise<void>;
   setBottomPadding(options: { value: string }): Promise<void>;
   sendPushTokenToIntercom(options: { value: string }): Promise<void>;
@@ -52,4 +53,10 @@ export interface IntercomUserUpdateOptions {
   phone?: string;
   languageOverride?: string;
   customAttributes?: { [key: string]: any };
+  company?: {
+    companyId: string;
+    name: string;
+    createdAt?: number;
+    customAttributes?: { [key: string]: any };
+  }
 }

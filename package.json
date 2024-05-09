@@ -1,6 +1,6 @@
 {
   "name": "@leadscout/intercom",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "description": "Enable Intercom features for Capacitor apps",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -60,7 +60,7 @@
     "android/build.gradle",
     "dist/",
     "ios/Plugin/",
-    "CapacitorCommunityIntercom.podspec"
+    "LeadscoutIntercom.podspec"
   ],
   "keywords": [
     "capacitor",

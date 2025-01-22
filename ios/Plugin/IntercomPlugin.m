@@ -7,6 +7,7 @@ CAP_PLUGIN(IntercomPlugin, "Intercom",
            CAP_PLUGIN_METHOD(loadWithKeys, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(registerIdentifiedUser, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(registerUnidentifiedUser, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(isUserLoggedIn, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(updateUser, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(logout, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(logEvent, CAPPluginReturnPromise);

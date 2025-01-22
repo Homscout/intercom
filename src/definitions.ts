@@ -8,6 +8,7 @@ export interface IntercomPlugin {
     userId?: string;
     email?: string;
   }): Promise<void>;
+  isUserLoggedIn(): Promise<{ isLoggedIn: boolean }>;
   registerUnidentifiedUser(): Promise<void>;
   updateUser(options: IntercomUserUpdateOptions): Promise<void>;
   logout(): Promise<void>;

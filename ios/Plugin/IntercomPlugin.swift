@@ -29,12 +29,17 @@ public class IntercomPlugin: CAPPlugin {
     }
     
     @objc func loadWithKeys(_ call: CAPPluginCall) {
-        let appId = call.getString("appId")  as? String ?? "NO_APP_ID_PASSED"
-        let apiKey = call.getString("apiKeyIOS") as? String ?? "NO_API_KEY_PASSED"
+        let appId = call.getString("appId") ?? "NO_APP_ID_PASSED"
+        let apiKey = call.getString("apiKeyIOS") ?? "NO_API_KEY_PASSED"
         
         Intercom.setApiKey(apiKey, forAppId: appId)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(self.didRegisterWithToken(notification:)), name: Notification.Name(CAPNotifications.DidRegisterForRemoteNotificationsWithDeviceToken.name()), object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.didRegisterWithToken(notification:)),
+            name: Notification.Name.capacitorDidRegisterForRemoteNotifications,
+            object: nil
+        )
     }
     
     @objc func registerIdentifiedUser(_ call: CAPPluginCall) {
@@ -62,6 +67,12 @@ public class IntercomPlugin: CAPPlugin {
         DispatchQueue.main.async {
             Intercom.loginUnidentifiedUser()
             call.resolve()
+        }
+    }
+    
+    @objc func isUserLoggedIn(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            call.resolve(["isLoggedIn": Intercom.isUserLoggedIn() ])
         }
     }
     

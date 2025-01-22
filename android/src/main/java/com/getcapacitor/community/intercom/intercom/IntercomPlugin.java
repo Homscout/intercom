@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.intercom.android.sdk.Intercom;
+import io.intercom.android.sdk.IntercomContent;
+import io.intercom.android.sdk.IntercomSpace;
 import io.intercom.android.sdk.UserAttributes;
 import io.intercom.android.sdk.Company;
 import io.intercom.android.sdk.identity.Registration;
@@ -172,6 +174,13 @@ public class IntercomPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void isUserLoggedIn(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("isLoggedIn", Intercom.client().isUserLoggedIn());
+        call.resolve(ret);
+    }
+
+    @PluginMethod
     public void logout(PluginCall call) {
         Intercom.client().logout();
         call.resolve();
@@ -193,7 +202,7 @@ public class IntercomPlugin extends Plugin {
 
     @PluginMethod
     public void displayMessenger(PluginCall call) {
-        Intercom.client().displayMessenger();
+        Intercom.client().present(IntercomSpace.Home);
         call.resolve();
     }
 
@@ -206,7 +215,7 @@ public class IntercomPlugin extends Plugin {
 
     @PluginMethod
     public void displayHelpCenter(PluginCall call) {
-        Intercom.client().displayHelpCenter();
+        Intercom.client().present(IntercomSpace.HelpCenter);
         call.resolve();
     }
 
@@ -243,14 +252,14 @@ public class IntercomPlugin extends Plugin {
     @PluginMethod
     public void displayCarousel(PluginCall call) {
         String carouselId = call.getString("carouselId");
-        Intercom.client().displayCarousel(carouselId);
+        Intercom.client().presentContent(new IntercomContent.Carousel(carouselId));
         call.resolve();
     }
 
     @PluginMethod
     public void startSurvey(PluginCall call) {
         String surveyId = call.getString("surveyId");
-        Intercom.client().displaySurvey(surveyId);
+        Intercom.client().presentContent(new IntercomContent.Survey(surveyId));
         call.resolve();
     }
 
@@ -299,7 +308,7 @@ public class IntercomPlugin extends Plugin {
     @PluginMethod
     public void displayArticle(PluginCall call) {
         String articleId = call.getString("articleId");
-        Intercom.client().displayArticle(articleId);
+        Intercom.client().presentContent(new IntercomContent.Article((articleId)));
         call.resolve();
     }
 

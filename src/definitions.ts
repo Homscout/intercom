@@ -1,14 +1,9 @@
+import type { PluginListenerHandle } from "@capacitor/core/types/definitions";
+
 export interface IntercomPlugin {
-  loadWithKeys(options: {
-    appId?: string;
-    apiKeyIOS?: string;
-    apiKeyAndroid?: string;
-  }): Promise<void>;
-  registerIdentifiedUser(options: {
-    userId?: string;
-    email?: string;
-  }): Promise<void>;
   isUserLoggedIn(): Promise<{ isLoggedIn: boolean }>;
+  loadWithKeys(options: { appId?: string; apiKeyIOS?: string; apiKeyAndroid?: string }): Promise<void>;
+  registerIdentifiedUser(options: { userId?: string; email?: string }): Promise<void>;
   registerUnidentifiedUser(): Promise<void>;
   updateUser(options: IntercomUserUpdateOptions): Promise<void>;
   logout(): Promise<void>;
@@ -22,12 +17,14 @@ export interface IntercomPlugin {
   displayInAppMessages(): Promise<void>;
   hideInAppMessages(): Promise<void>;
   displayCarousel(options: { carouselId: string }): Promise<void>;
-  startSurvey(options: { surveyId: string }): Promise<void>;
   setUserHash(options: { hmac: string }): Promise<void>;
   setBottomPadding(options: { value: string }): Promise<void>;
   sendPushTokenToIntercom(options: { value: string }): Promise<void>;
   receivePush(notification: IntercomPushNotificationData): Promise<void>;
-  displayArticle(options: { articleId: string; }): Promise<void>;
+  displayArticle(options: { articleId: string }): Promise<void>;
+  addListener(eventName: 'windowDidShow', listenerFunc: () => void): Promise<PluginListenerHandle>;
+  addListener(eventName: 'windowDidHide', listenerFunc: () => void): Promise<PluginListenerHandle>;
+  removeAllListeners(): Promise<void>;
 }
 
 export interface IntercomPushNotificationData {

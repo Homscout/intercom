@@ -1,5 +1,13 @@
 package com.getcapacitor.community.intercom;
 
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.getcapacitor.CapConfig;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -10,27 +18,29 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 
-import org.json.JSONException;
-import androidx.annotation.NonNull;
-
+import io.intercom.android.sdk.Company;
+import io.intercom.android.sdk.Intercom;
+import io.intercom.android.sdk.IntercomContent;
+import io.intercom.android.sdk.IntercomError;
+import io.intercom.android.sdk.IntercomPushManager;
+import io.intercom.android.sdk.IntercomSpace;
+import io.intercom.android.sdk.IntercomStatusCallback;
+import io.intercom.android.sdk.UserAttributes;
+import io.intercom.android.sdk.identity.Registration;
+import io.intercom.android.sdk.push.IntercomPushClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import io.intercom.android.sdk.Intercom;
-import io.intercom.android.sdk.IntercomContent;
-import io.intercom.android.sdk.IntercomSpace;
-import io.intercom.android.sdk.UserAttributes;
-import io.intercom.android.sdk.Company;
-import io.intercom.android.sdk.identity.Registration;
-import io.intercom.android.sdk.push.IntercomPushClient;
-import io.intercom.android.sdk.IntercomStatusCallback;
-import io.intercom.android.sdk.IntercomError;
+import org.json.JSONException;
 
 @CapacitorPlugin(name = "Intercom", permissions = @Permission(strings = {}, alias = "receive"))
 public class IntercomPlugin extends Plugin {
+
+    private static final String EVENT_WINDOW_DID_SHOW = "windowDidShow";
+    private static final String EVENT_WINDOW_DID_HIDE = "windowDidHide";
+
     private final IntercomPushClient intercomPushClient = new IntercomPushClient();
 
     @Override
@@ -41,14 +51,14 @@ public class IntercomPlugin extends Plugin {
         // load parent
         super.load();
     }
-    
-    @PluginMethod()
+
+    @PluginMethod
     public void loadWithKeys(PluginCall call) {
         String appId = call.getString("appId", "NO_APP_ID_PASSED");
         String apiKey = call.getString("apiKeyAndroid", "NO_API_KEY_PASSED");
 
         Intercom.initialize(this.getActivity().getApplication(), apiKey, appId);
-     
+
         // load parent
         super.load();
     }
@@ -56,14 +66,30 @@ public class IntercomPlugin extends Plugin {
     @Override
     public void handleOnStart() {
         super.handleOnStart();
-        bridge.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                //We also initialize intercom here just in case it has died. If Intercom is already set up, this won't do anything.
-                setUpIntercom();
-                Intercom.client().handlePushMessage();
-            }
-        });
+        bridge
+            .getActivity()
+            .runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        //We also initialize intercom here just in case it has died. If Intercom is already set up, this won't do anything.
+                        setUpIntercom();
+                        Intercom.client().handlePushMessage();
+                    }
+                }
+            );
+    }
+
+    @Override
+    public void handleOnPause() {
+        super.handleOnPause();
+        notifyListeners(EVENT_WINDOW_DID_SHOW, null);
+    }
+
+    @Override
+    public void handleOnResume() {
+        super.handleOnResume();
+        notifyListeners(EVENT_WINDOW_DID_HIDE, null);
     }
 
     @PluginMethod
@@ -79,6 +105,7 @@ public class IntercomPlugin extends Plugin {
         if (userId != null && userId.length() > 0) {
             registration = registration.withUserId(userId);
         }
+
         Intercom.client().loginIdentifiedUser(registration, new IntercomStatusCallback() {
             @Override
             public void onSuccess() {
@@ -253,13 +280,6 @@ public class IntercomPlugin extends Plugin {
     public void displayCarousel(PluginCall call) {
         String carouselId = call.getString("carouselId");
         Intercom.client().presentContent(new IntercomContent.Carousel(carouselId));
-        call.resolve();
-    }
-
-    @PluginMethod
-    public void startSurvey(PluginCall call) {
-        String surveyId = call.getString("surveyId");
-        Intercom.client().presentContent(new IntercomContent.Survey(surveyId));
         call.resolve();
     }
 

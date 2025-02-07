@@ -1,11 +1,14 @@
 import { WebPlugin } from '@capacitor/core';
-import { IntercomPlugin, IntercomPushNotificationData, IntercomUserUpdateOptions } from './definitions';
+
+import type {
+  IntercomPlugin,
+  IntercomPushNotificationData,
+  IntercomUserUpdateOptions,
+} from './definitions';
+
 export class IntercomWeb extends WebPlugin implements IntercomPlugin {
   constructor() {
-    super({
-      name: 'Intercom',
-      platforms: ['web'],
-    });
+    super();
   }
 
   async registerIdentifiedUser(options: { userId?: string; email?: string }): Promise<void> {
@@ -17,7 +20,7 @@ export class IntercomWeb extends WebPlugin implements IntercomPlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async loadWithKeys(options: { appId?: string; apiKeyIOS?: string; apiKeyAndroid?: string; }): Promise<void> {
+  async loadWithKeys(options: { appId?: string; apiKeyIOS?: string; apiKeyAndroid?: string }): Promise<void> {
     options;
     throw this.unimplemented('Not implemented on web.');
   }
@@ -57,19 +60,19 @@ export class IntercomWeb extends WebPlugin implements IntercomPlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async displayLauncher(): Promise<void>  {
+  async displayLauncher(): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async hideLauncher(): Promise<void>  {
+  async hideLauncher(): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async displayInAppMessages(): Promise<void>  {
+  async displayInAppMessages(): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async hideInAppMessages(): Promise<void>  {
+  async hideInAppMessages(): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 
@@ -77,12 +80,6 @@ export class IntercomWeb extends WebPlugin implements IntercomPlugin {
     options;
     throw this.unimplemented('Not implemented on web.');
   }
-
-  async startSurvey(options: { surveyId: string }): Promise<void> {
-    options;
-    throw this.unimplemented('Not implemented on web.');
-  }
-
 
   async setUserHash(options: { hmac: string }): Promise<void> {
     options;
@@ -104,7 +101,7 @@ export class IntercomWeb extends WebPlugin implements IntercomPlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async displayArticle(options: { articleId: string; }): Promise<void> {
+  async displayArticle(options: { articleId: string }): Promise<void> {
     options;
     throw this.unimplemented('Not implemented on web.');
   }

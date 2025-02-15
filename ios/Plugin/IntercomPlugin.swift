@@ -60,17 +60,14 @@ public class IntercomPlugin: CAPPlugin {
         let email = call.getString("email")
         let attributes = ICMUserAttributes()
 
-        if (email) != nil {
-            attributes.email = email
-            Intercom.loginUser(with: attributes) { result in
-                switch result {
-                case .success: call.resolve()
-                case .failure(let error): call.reject("Error logging in: \(error.localizedDescription)")
-                }
-            }
-        }
-        else if (userId) != nil {
+        if let userId = userId {
             attributes.userId = userId
+        }
+        if let email = email {
+            attributes.email = email
+        }
+
+        DispatchQueue.main.async {
             Intercom.loginUser(with: attributes) { result in
                 switch result {
                 case .success: call.resolve()

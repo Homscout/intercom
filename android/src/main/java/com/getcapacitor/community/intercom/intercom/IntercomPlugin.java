@@ -1,13 +1,6 @@
-package com.getcapacitor.community.intercom;
+package com.getcapacitor.community.intercom.intercom;
 
-import android.app.Activity;
-import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import com.getcapacitor.CapConfig;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -17,7 +10,6 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
-
 import io.intercom.android.sdk.Company;
 import io.intercom.android.sdk.Intercom;
 import io.intercom.android.sdk.IntercomContent;
@@ -33,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.json.JSONException;
 
 @CapacitorPlugin(name = "Intercom", permissions = @Permission(strings = {}, alias = "receive"))
@@ -173,13 +166,13 @@ public class IntercomPlugin extends Plugin {
             }
 
             Map<String, Object> companyCustomAttributes = mapFromJSON(company.getJSObject("customAttributes"));
-            companyBuilder.withCustomAttributes(companyCustomAttributes);
+            if (companyCustomAttributes != null) {
+                companyBuilder.withCustomAttributes(companyCustomAttributes);
+            }
 
             try {
                 Long createdAt = company.getLong("createdAt");
-                if (createdAt != null) {
-                    companyBuilder.withCreatedAt(createdAt);
-                }
+                companyBuilder.withCreatedAt(createdAt);
             } catch (Exception e) {
                 Logger.error("Intercom", "ERROR: Could not handle company.createdAt", e);
             }
@@ -217,14 +210,16 @@ public class IntercomPlugin extends Plugin {
     public void logEvent(PluginCall call) {
         String eventName = call.getString("name");
         Map<String, Object> metaData = mapFromJSON(call.getObject("data"));
-
-        if (metaData == null) {
-            Intercom.client().logEvent(eventName);
+        if (eventName != null) {
+            if (metaData == null) {
+                Intercom.client().logEvent(eventName);
+            } else {
+                Intercom.client().logEvent(eventName, metaData);
+            }
+            call.resolve();
         } else {
-            Intercom.client().logEvent(eventName, metaData);
+            call.reject("logEvent missing 'name' parameter");
         }
-
-        call.resolve();
     }
 
     @PluginMethod
@@ -279,33 +274,50 @@ public class IntercomPlugin extends Plugin {
     @PluginMethod
     public void displayCarousel(PluginCall call) {
         String carouselId = call.getString("carouselId");
-        Intercom.client().presentContent(new IntercomContent.Carousel(carouselId));
-        call.resolve();
+        if (carouselId == null) {
+            call.reject("Missing displayCarousel 'carouselId'");
+        } else {
+            Intercom.client().presentContent(new IntercomContent.Carousel(carouselId));
+            call.resolve();
+        }
     }
 
     @PluginMethod
     public void setUserHash(PluginCall call) {
         String hmac = call.getString("hmac");
-        Intercom.client().setUserHash(hmac);
-        call.resolve();
+        if (hmac == null) {
+            call.reject("Missing setUserHash 'hmac'");
+        } else {
+            Intercom.client().setUserHash(hmac);
+            call.resolve();
+        }
     }
 
     @PluginMethod
     public void setBottomPadding(PluginCall call) {
         String stringValue = call.getString("value");
-        int value = Integer.parseInt(stringValue);
-        Intercom.client().setBottomPadding(value);
-        call.resolve();
+        if (stringValue == null) {
+            call.reject("Missing bottom padding 'value'");
+        } else {
+            int value = Integer.parseInt(stringValue);
+            Intercom.client().setBottomPadding(value);
+            call.resolve();
+        }
     }
 
     @PluginMethod
     public void sendPushTokenToIntercom(PluginCall call) {
         String token = call.getString("value");
-        try {
-            intercomPushClient.sendTokenToIntercom(this.getActivity().getApplication(), token);
-            call.resolve();
-        } catch (Exception e) {
-            call.reject("Failed to send push token to Intercom", e);
+
+        if (token == null) {
+            call.reject("sendPushTokenToIntercom missing 'value'");
+        } else {
+            try {
+                intercomPushClient.sendTokenToIntercom(this.getActivity().getApplication(), token);
+                call.resolve();
+            } catch (Exception e) {
+                call.reject("Failed to send push token to Intercom", e);
+            }
         }
     }
 
@@ -328,8 +340,12 @@ public class IntercomPlugin extends Plugin {
     @PluginMethod
     public void displayArticle(PluginCall call) {
         String articleId = call.getString("articleId");
-        Intercom.client().presentContent(new IntercomContent.Article((articleId)));
-        call.resolve();
+        if (articleId == null) {
+            call.reject("displayArticle missing 'articleId");
+        } else {
+            Intercom.client().presentContent(new IntercomContent.Article((articleId)));
+            call.resolve();
+        }
     }
 
     private void setUpIntercom() {

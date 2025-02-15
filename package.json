@@ -1,6 +1,6 @@
 {
   "name": "@leadscout/intercom",
-  "version": "7.0.3-rc2",
+  "version": "7.0.4",
   "description": "Enable Intercom features for Capacitor apps",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
